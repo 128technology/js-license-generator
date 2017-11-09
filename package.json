@@ -1,0 +1,25 @@
+{
+  "name": "js-license-generator",
+  "version": "1.0.0",
+  "description": "A license generator for Javascript projects",
+  "main": "index.js",
+  "scripts": {},
+  "author": "128 Technology",
+  "license": "MIT",
+  "private": true,
+  "files": [
+    "index.js"
+  ],
+  "bin": {
+    "js-license-generator": "index.js"
+  },
+  "dependencies": {
+    "minimist": "^0.1.0",
+    "nlf": "^1.4.3"
+  },
+  "devDependencies": {
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb-base": "^11.1.3",
+    "eslint-plugin-import": "^2.2.0"
+  }
+}
