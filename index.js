@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-/* eslint no-console: "off"*/
-
 const nlf = require('nlf');
 const fs = require('fs');
 const minimist = require('minimist');
@@ -22,11 +20,11 @@ if (argv.help) {
   console.log('license-generator [arguments]');
   console.log();
   console.log('Arguments:');
-  console.log('--directory=<dir>    The directory to search.');
-  console.log('--cacheFile=<path>   An absolute path to a JSON cache file for looking up missing licenses.');
-  console.log('--ignore=<name>      Comma separated package names to ignore.');
-  console.log('--production         Search for licenses on production dependencies. Default is development.');
-  console.log('--help               This help.');
+  console.log('--directory=<dir>        The directory to search.');
+  console.log('--cacheFile=<path>       An absolute path to a JSON cache file for looking up missing licenses.');
+  console.log('--ignore=<name1, name2>  Comma separated package names to ignore.');
+  console.log('--production             Search for licenses on production dependencies. Default is development.');
+  console.log('--help                   This help.');
   process.exit(0);
 }
 
