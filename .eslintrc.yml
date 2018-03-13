@@ -1,3 +1,20 @@
-extends: airbnb-base
+extends:
+  - airbnb-base
+  - prettier
+
 plugins:
   - import
+  - prettier
+
+env:
+  node: true
+  mocha: true
+
+rules:
+  import/extensions: off
+  import/no-unresolved: off
+  no-underscore-dangle: off
+  no-console: off
+  prettier/prettier: [error, { singleQuote: true, trailingComma: none, printWidth: 120 }]
+  spaced-comment: off
+  no-unused-expressions: off

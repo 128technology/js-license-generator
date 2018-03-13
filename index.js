@@ -5,25 +5,16 @@
 const nlf = require('nlf');
 const fs = require('fs');
 const minimist = require('minimist');
+const _ = require('lodash');
+const chalk = require('chalk');
 
-function getPackageIdentifier(npmPackage) {
-  return `${npmPackage.name}@${npmPackage.version}`;
-}
-
-function getPackageHeader(packageID) {
-  let header = '';
-
-  header += '=====================================================\n';
-  header += `${packageID}\n`;
-  header += '=====================================================\n';
-
-  return header;
-}
+const { TextBuilder, JSONBuilder } = require('./lib/builders');
+const { exit } = require('./lib/util');
 
 const argv = minimist(process.argv, {
   default: {
-    directory: process.cwd(),
-  },
+    directory: process.cwd()
+  }
 });
 
 if (argv.help) {
@@ -32,59 +23,80 @@ if (argv.help) {
   console.log();
   console.log('Arguments:');
   console.log('--directory=<dir>    The directory to search.');
+  console.log('--cacheFile=<path>   An absolute path to a JSON cache file for looking up missing licenses.');
+  console.log('--ignore=<name>      Comma separated package names to ignore.');
   console.log('--production         Search for licenses on production dependencies. Default is development.');
   console.log('--help               This help.');
   process.exit(0);
 }
 
 const production = !!argv.production;
-const directory = argv.directory;
+const { directory, cacheFile, ignore } = argv;
+
+const ignoreSet = ignore ? new Set(ignore.split(',')) : new Set();
+const cache = cacheFile ? JSON.parse(fs.readFileSync(cacheFile, 'utf-8')) : null;
+
 console.log(`Searching for ${production ? 'production' : 'development'} licenses in ${directory}`);
 
 nlf.find({ directory, production }, (err, npmPackages) => {
   if (err) {
-    console.log('NLF Failed.');
-    process.exit(-1);
-    return;
+    exit(err);
   }
 
-  let output = '';
+  const builders = [new TextBuilder(), new JSONBuilder()];
 
-  for (let i = 0, lenI = npmPackages.length; i < lenI; i += 1) {
-    const npmPackage = npmPackages[i];
-    const packageID = getPackageIdentifier(npmPackage);
+  npmPackages.forEach(npmPackage => {
+    const { name, version } = npmPackage;
 
-    if (npmPackage.name === 'nlf') {
-      console.log('License source for %s must be manually included.', packageID);
-    } else {
-      const sources = npmPackage.licenseSources.license.sources;
-
-      output += getPackageHeader(packageID);
-
-      if (sources.length > 0) {
-        for (let j = 0, lenJ = sources.length; j < lenJ; j += 1) {
-          const licenseText = sources[j].text;
-          output += licenseText;
-        }
-      } else if (npmPackage.licenseSources.package.sources.length > 0) {
-        const packageSources = npmPackage.licenseSources.package.sources.map(source => source.license).join(', ');
-
-        console.log('License source not found for %s, derived license types are: %s.', packageID, packageSources);
-      } else {
-        console.log(`License could not be detected for package ${packageID}.`);
-      }
-
-      output += '\n\n';
-    }
-  }
-
-  fs.writeFile('licenses.txt', output, (error) => {
-    if (error) {
-      console.error(error);
-      process.exit(-1);
+    if (ignoreSet.has(name)) {
       return;
     }
 
-    console.log('Wrote licenses.txt');
+    const packageID = TextBuilder.getPackageIdentifier(npmPackage);
+    const sources = _.get(npmPackage, 'licenseSources.license.sources', []);
+
+    if (sources.length > 0) {
+      builders.forEach(builder => {
+        builder.add(npmPackage);
+      });
+    } else if (cache && _.get(cache, [name, version], null)) {
+      console.log(chalk.gray(`License found in cache for ${packageID}.`));
+
+      const cachedDefinition = _.get(cache, [name, version], null);
+
+      builders.forEach(builder => {
+        builder.addCached(name, version, cachedDefinition);
+      });
+    } else if (cache && _.get(cache, [name], null)) {
+      console.log(chalk.yellow(`License found in cache for a different version of ${packageID}.`));
+
+      const lastVersionDefinition = _.last(_.values(_.get(cache, [name], null)));
+
+      builders.forEach(builder => {
+        builder.addCached(name, version, lastVersionDefinition);
+      });
+    } else if (_.get(npmPackage, 'licenseSources.package.sources', []).length > 0) {
+      const packageSources = _.get(npmPackage, 'licenseSources.package.sources', [])
+        .map(({ license }) => license)
+        .join(', ');
+
+      console.log(
+        chalk.red(`License source not found for ${packageID}, derived license types are: ${packageSources}.`)
+      );
+
+      builders.forEach(builder => {
+        builder.addEmpty(name, version);
+      });
+    } else {
+      console.log(chalk.red(`License could not be detected for package ${packageID}.`));
+
+      builders.forEach(builder => {
+        builder.addEmpty(name, version);
+      });
+    }
+  });
+
+  builders.forEach(builder => {
+    builder.write();
   });
 });
