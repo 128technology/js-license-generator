@@ -10,7 +10,9 @@
   "author": "128 Technology",
   "license": "MIT",
   "private": true,
-  "files": ["index.js"],
+  "files": [
+    "index.js"
+  ],
   "bin": {
     "js-license-generator": "index.js"
   },
@@ -19,9 +21,12 @@
   },
   "dependencies": {
     "chalk": "^2.3.2",
+    "license-checker": "^25.0.1",
     "lodash": "^4.17.5",
     "minimist": "^0.1.0",
-    "nlf": "^1.4.3"
+    "nlf": "^1.4.3",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.2"
   },
   "devDependencies": {
     "prettier": "^1.11.1",
