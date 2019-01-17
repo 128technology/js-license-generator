@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-const nlf = require('nlf');
 const fs = require('fs');
 const minimist = require('minimist');
 const _ = require('lodash');
@@ -46,10 +45,12 @@ lc.init({ start: directory, production }, (err, npmPackages) => {
     exit(err);
   }
 
-  const builders = [new TextBuilder(), new JSONBuilder()];
+  const jsonBuilder = new JSONBuilder();
+  const builders = [new TextBuilder(), jsonBuilder];
 
   _.forEach(npmPackages, (npmPackage, nameVer) => {
-    const [name, version] = [_.initial(nameVer.split('@')).join('@'), _.last(nameVer.split('@'))];
+    const name = _.initial(nameVer.split('@')).join('@');
+    const version = _.last(nameVer.split('@'));
 
     npmPackage.name = npmPackage.name ? npmPackage.name : name;
     npmPackage.version = npmPackage.version ? npmPackage.version : version;
@@ -58,7 +59,7 @@ lc.init({ start: directory, production }, (err, npmPackages) => {
     }
 
     const packageID = nameVer;
-    const licenseFile = _.get(npmPackage, 'licenseFile', '');
+    const licenseFile = npmPackage.licenseFile || '';
 
     let hasReadme = false;
     if (!readme) {
@@ -108,7 +109,7 @@ lc.init({ start: directory, production }, (err, npmPackages) => {
         builder.addEmpty(name, version);
       });
     }
-    promises.push(builders[1].buildLink(name, npmPackage.repository, npmPackage.licenseFile));
+    promises.push(jsonBuilder.buildLink(name, npmPackage.repository, npmPackage.licenseFile));
   });
   
   Promise.all(promises).then(() => {
