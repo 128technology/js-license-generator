@@ -6,8 +6,8 @@ const _ = require('lodash');
 const chalk = require('chalk');
 const lc = require('license-checker');
 
-const { TextBuilder, JSONBuilder } = require('./lib/builders');
-const { exit } = require('./lib/util');
+const { TextBuilder, JSONBuilder } = require('../lib/builders');
+const { exit } = require('../lib/util');
 
 const argv = minimist(process.argv, {
   default: {
