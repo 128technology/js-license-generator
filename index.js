@@ -6,7 +6,7 @@ const _ = require('lodash');
 const chalk = require('chalk');
 const lc = require('license-checker');
 
-const { TextBuilder, JSONBuilder, XLSXBuilder } = require('./lib/builders');
+const { TextBuilder, JSONBuilder } = require('./lib/builders');
 const { exit } = require('./lib/util');
 
 const argv = minimist(process.argv, {
@@ -18,6 +18,10 @@ const argv = minimist(process.argv, {
 if (argv.help) {
   console.log('Usage:');
   console.log('license-generator [arguments]');
+  console.log();
+  console.log('Description:');
+  console.log('Runs through a project containing node_modules and attempts to gather the license information.');
+  console.log('Outputs a json and plain text version of all module licenses.');
   console.log();
   console.log('Arguments:');
   console.log('--directory=<dir>        The directory to search.');
@@ -42,7 +46,7 @@ const cache = cacheFile ? JSON.parse(fs.readFileSync(cacheFile, 'utf-8')) : null
 
 console.log(`Searching for ${production ? 'production' : 'development'} licenses in ${directory}`);
 
-let promises = [];
+const promises = [];
 
 lc.init({ start: directory, production }, (err, npmPackages) => {
   if (err) {

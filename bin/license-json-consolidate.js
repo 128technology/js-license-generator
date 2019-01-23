@@ -11,6 +11,12 @@ if (argv.help) {
   console.log('Usage:');
   console.log('license-json-consolidate [arguments]');
   console.log();
+  console.log('Description:');
+  console.log('Consolidates a list of json license files in a given directory into a single file.');
+  console.log(
+    'The json license files should be formatted like the ones that js-license-generator or license-parser makes'
+  );
+  console.log();
   console.log('Arguments:');
   console.log('--name=<string>          The name of the output file (default is "output.json".)');
   console.log(
