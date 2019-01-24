@@ -6,8 +6,8 @@ const _ = require('lodash');
 const chalk = require('chalk');
 const lc = require('license-checker');
 
-const { TextBuilder, JSONBuilder } = require('./lib/builders');
-const { exit } = require('./lib/util');
+const { TextBuilder, JSONBuilder } = require('../lib/builders');
+const { exit } = require('../lib/util');
 
 const argv = minimist(process.argv, {
   default: {
@@ -19,11 +19,18 @@ if (argv.help) {
   console.log('Usage:');
   console.log('license-generator [arguments]');
   console.log();
+  console.log('Description:');
+  console.log('Runs through a project containing node_modules and attempts to gather the license information.');
+  console.log('Outputs a json and plain text version of all module licenses.');
+  console.log();
   console.log('Arguments:');
   console.log('--directory=<dir>        The directory to search.');
   console.log('--cacheFile=<path>       An absolute path to a JSON cache file for looking up missing licenses.');
   console.log('--ignore=<name1, name2>  Comma separated package names to ignore.');
   console.log('--production             Search for licenses on production dependencies. Default is development.');
+  console.log(
+    '--links                  Check online for a reference of the license from the default github location and add it to the package output.'
+  );
   console.log('--readme                 Use the readme as a fallback when LICENSE is not available.');
   console.log('--help                   This help.');
   process.exit(0);
@@ -31,6 +38,7 @@ if (argv.help) {
 
 const production = !!argv.production;
 const readme = !!argv.readme;
+const links = !!argv.links;
 const { directory, cacheFile, ignore } = argv;
 
 const ignoreSet = ignore ? new Set(ignore.split(',')) : new Set();
@@ -38,7 +46,7 @@ const cache = cacheFile ? JSON.parse(fs.readFileSync(cacheFile, 'utf-8')) : null
 
 console.log(`Searching for ${production ? 'production' : 'development'} licenses in ${directory}`);
 
-let promises = [];
+const promises = [];
 
 lc.init({ start: directory, production }, (err, npmPackages) => {
   if (err) {
@@ -101,7 +109,7 @@ lc.init({ start: directory, production }, (err, npmPackages) => {
 
       builders.forEach(builder => {
         builder.addEmpty(name, version);
-      }); 
+      });
     } else {
       console.log(chalk.red(`License could not be detected for package ${packageID}.`));
 
@@ -109,9 +117,11 @@ lc.init({ start: directory, production }, (err, npmPackages) => {
         builder.addEmpty(name, version);
       });
     }
-    promises.push(jsonBuilder.buildLink(name, npmPackage.repository, npmPackage.licenseFile));
+    if (links) {
+      promises.push(jsonBuilder.buildLink(name, npmPackage.repository, npmPackage.licenseFile));
+    }
   });
-  
+
   Promise.all(promises).then(() => {
     builders.forEach(builder => {
       builder.write();
