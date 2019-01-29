@@ -2,75 +2,95 @@
 <html>
   <head>
     <style>
-      #links-container {
-        padding: 1rem;
+      .row {
+        padding: 0.1rem 1rem;
         display: flex;
         flex-direction: row;
+        width: 100%;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #D8D8D8;
       }
 
-      #names {
-        flex: 0 0 auto;
+      .col,
+      .license-body {
+        font-weight: 300;
       }
 
-      #versions {
+      .col-1 {
+        flex: 2;
+      }
+
+      .col-2 {
         flex: 1;
-        padding-left: 5rem;
       }
 
-      .col-header {
+      .col-3 {
+        flex: 3;
+      }
+
+      .header {
         font-size: 1.2rem;
-      }
-
-      .index {
-        padding: 0.1rem 0;
+        padding: 1rem 0;
       }
 
       .license-container {
-        max-width: 1000px;
-        padding: 0 1rem;
+        display: flex;
+        justify-content: center;
+        padding: 0 3rem;
+        flex-direction: column;
       }
 
       .license-container:nth-of-type(even) {
-        background-color: #DFDFDF;
+        background-color: #F1F1F1;
+      }
+
+      .license-title {
+        padding: 0.5rem 0;
       }
 
       .license-body {
         padding: 1rem;
+        text-align: justify;
+      }
+
+      body {
+        font-family: sans-serif;
       }
 
       a {
+        color: #00adef;
         text-decoration: none;
-        font-weight: bold;
       }
 
       a:visited {
-        color: blue;
+        color: #00adef;
+      }
+
+      a:hover {
+        color: #23527c;
+        text-decoration: underline;
       }
     </style>
   </head>
   <body>
     <a id="top"></a>
-    <div id="links-container">
-      <div id="names">
-        <div class="col-header">Dependency Names</div>
-        {{#links}}
-          <div class="index">
-            <a href="#{{name}}">{{name}}</a>
-          </div>
-        {{/links}}
-      </div>
-      <div id="versions">
-        <div class="col-header">Versions</div>
-        {{#links}}
-          <div class="index">
-            {{version}}
-          </div>
-        {{/links}}
-      </div>
+    <div class="row header">
+      <div class="col-1">Dependency Name</div>
+      <div class="col-2">Version</div>
+      <div class="col-3">License</div>
     </div>
     {{#links}}
+      <div class="row">
+        <div class="col col-1">
+          <a href="#{{name}}">{{name}}</a>
+        </div>
+        <div class="col col-2">{{version}}</div>
+        <div class="col col-3">{{types}}</div>
+      </div>
+    {{/links}}
+    {{#links}}
       <div class="license-container">
-        <a href="#top" id="{{name}}">{{name}} - Version {{version}}</a>
+        <a class="license-title" href="#top" id="{{name}}">{{name}} - Version {{version}}</a>
         <div class="license-body">{{text}}</div>
       </div>
     {{/links}}
