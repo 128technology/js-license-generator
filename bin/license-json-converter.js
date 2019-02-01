@@ -5,7 +5,7 @@ const minimist = require('minimist');
 const _ = require('lodash');
 const chalk = require('chalk');
 const semver = require('semver');
-const { XLSXBuilder, HTMLBuilder } = require('../lib/builders');
+const { XLSXBuilder, CSVBuilder, HTMLBuilder } = require('../lib/builders');
 
 const argv = minimist(process.argv);
 
@@ -15,7 +15,7 @@ if (argv.help) {
   console.log();
   console.log('Description:');
   console.log('Converts a json license file into another supported format (default CSV).');
-  console.log('Supported formats: CSV, HTML');
+  console.log('Supported formats: CSV, XLSX, HTML');
   console.log(
     'The json license file should be formatted like the ones that js-license-generator or license-parser makes.'
   );
@@ -35,8 +35,11 @@ const formatArray = formats ? formats.toLowerCase().split(',') : ['csv'];
 
 const licenses = JSON.parse(fs.readFileSync(cacheFile, 'utf-8'));
 const builders = [];
-if (formatArray.includes('csv')) {
+if (formatArray.includes('xlsx')) {
   builders.push(new XLSXBuilder());
+}
+if (formatArray.includes('csv')) {
+  builders.push(new CSVBuilder());
 }
 if (formatArray.includes('html')) {
   builders.push(new HTMLBuilder());
