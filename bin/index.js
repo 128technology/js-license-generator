@@ -75,12 +75,9 @@ const parsePackage = async (rawPackage, packageID) => {
 
   const licenseIsReadme = licenseFile.toLowerCase().indexOf('readme') > -1;
 
-  const text =
-    ((licenseIsReadme && (readmeParse || readme)) || !licenseIsReadme) && licenseFile.length > 0
-      ? fs.readFileSync(licenseFile, 'utf-8')
-      : null;
+  const text = licenseFile.length > 0 ? fs.readFileSync(licenseFile, 'utf-8') : null;
 
-  if (text && !licenseIsReadme) {
+  if (!licenseIsReadme && text) {
     return [SaveType.ADD, { ...npmPackage, text }];
   }
   if (cache && _.get(cache, [name, version], null)) {
@@ -157,8 +154,7 @@ const runParser = async (err, npmPackages) => {
           builders.forEach(builder => builder.addEmpty(name, version));
           break;
         default:
-          console.error(`${type} is not a package build operation! - ${packageID}`);
-          break;
+          throw `${type} is not a package build operation! - ${packageID}`;
       }
 
       if (links) {
