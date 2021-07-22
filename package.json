@@ -27,7 +27,7 @@
     "minimist": "^0.1.0",
     "mustache": "^3.0.1",
     "semver": "^5.6.0",
-    "xlsx": "^0.14.1"
+    "xlsx": "^0.17.0"
   },
   "devDependencies": {
     "prettier": "^1.11.1",
