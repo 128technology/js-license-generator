@@ -32,7 +32,9 @@ let licenseConsolidation = {};
 
 const results = fs.readdirSync(directory);
 results.forEach(filName => {
-  addEntry(path.resolve(directory, filName));
+  if (filName.includes('.json')) {
+    addEntry(path.resolve(directory, filName));
+  }
 });
 
 const outputName = name ? name : 'output';
